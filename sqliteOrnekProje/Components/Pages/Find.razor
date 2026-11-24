@@ -1,0 +1,74 @@
+﻿@page "/find"
+@using sqliteOrnekProje.Models
+@using sqliteOrnekProje.Services
+@inject DatabaseService DbService
+
+<h3 class="mb-4 text-center">TC Kimlik No ile Personel Sorgulama</h3>
+
+<!-- ARAMA FORMU -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-info text-white">
+        <h5 class="card-title mb-0">Arama Kriteri</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <input class="form-control" @bind="aradanTc" placeholder="TC Kimlik No Giriniz..." />
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-primary me-2" @onclick="Ara">Ara</button>
+                <button class="btn btn-secondary" @onclick="Temizle">Temizle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ARAMA SONUCU -->
+@if (aramaYapildi)
+{
+    @if (bulunanKisi != null)
+    {
+        <div class="card border-success shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">Personel Bulundu</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>TC Kimlik No:</strong> @bulunanKisi.Tc</li>
+                    <li class="list-group-item"><strong>Ad:</strong> @bulunanKisi.Ad</li>
+                    <li class="list-group-item"><strong>Soyad:</strong> @bulunanKisi.Soyad</li>
+                    <li class="list-group-item"><strong>Eğitim Durumu:</strong> @bulunanKisi.EgitimDurumu</li>
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">
+            Girdiğiniz TC Kimlik No (<strong>@aradanTc</strong>) ile eşleşen bir personel kaydı bulunamadı.
+        </div>
+    }
+}
+
+@code {
+    private string aradanTc = string.Empty;
+    private TemelBilgi? bulunanKisi;
+    private bool aramaYapildi = false;
+
+    private async Task Ara()
+    {
+        if (!string.IsNullOrWhiteSpace(aradanTc))
+        {
+            // DatabaseService içerisindeki GetByTcAsync metodunu çağırıyoruz
+            bulunanKisi = await DbService.GetByTcAsync(aradanTc.Trim());
+            aramaYapildi = true;
+        }
+    }
+
+    private void Temizle()
+    {
+        aradanTc = string.Empty;
+        bulunanKisi = null;
+        aramaYapildi = false;
+    }
+}
